@@ -60,7 +60,7 @@ class TestNoteCreation(TestCase):
             data={
                 'title': 'заголовок',
                 'text': 'текст',
-                }
+            }
         )
         self.assertEqual(Note.objects.count(), 1)
         note = Note.objects.get()
