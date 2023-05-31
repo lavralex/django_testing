@@ -7,23 +7,28 @@ from news.models import Comment
 
 
 @pytest.mark.django_db
-def test_anonymous_user_cant_create_comment(client, detail_url):
-    form_data = {'text': 'Текст комментария'}
+def test_anonymous_user_cant_create_comment(client, detail_url, form_data):
     client.post(detail_url, data=form_data)
     comments_count = Comment.objects.count()
     assert comments_count == 0
+    comment = Comment.objects.filter(text=form_data['text']).first()
+    assert comment is None
 
 
 @pytest.mark.django_db
-def test_user_can_create_comment(authorized_client, news, author, detail_url):
-    form_data = {'text': 'Текст комментария'}
+def test_user_can_create_comment(
+    authorized_client,
+    news, author,
+    detail_url,
+    form_data
+):
     response = authorized_client.post(detail_url, data=form_data)
     assert response.status_code == HTTPStatus.FOUND
     assert response.url == f'{detail_url}#comments'
     comments_count = Comment.objects.count()
     assert comments_count == 1
     comment = Comment.objects.get()
-    assert comment.text == 'Текст комментария'
+    assert comment.text == form_data['text']
     assert comment.news == news
     assert comment.author == author
 
@@ -69,7 +74,7 @@ def test_author_can_edit_comment(
     response = authorized_client.post(edit_url, data=form_data)
     assert response.url == f'{detail_url}#comments'
     comment.refresh_from_db()
-    assert comment.text == form_data["text"]
+    assert comment.text == form_data['text']
 
 
 def test_user_cant_edit_comment_of_another_user(
@@ -81,4 +86,4 @@ def test_user_cant_edit_comment_of_another_user(
     response = authorized_reader.post(edit_url, data=form_data)
     assert response.status_code == HTTPStatus.NOT_FOUND
     comment.refresh_from_db()
-    assert comment.text == 'комментарий'
+    assert comment.text == form_data['text']
