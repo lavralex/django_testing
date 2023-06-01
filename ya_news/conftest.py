@@ -49,18 +49,6 @@ def news_list():
 
 
 @pytest.fixture
-def comment_list(news, author):
-    comment_list = []
-    for index in range(5):
-        comment = Comment(
-            news=news, author=author, text=f'комментарий{index}'
-        )
-        comment.save()
-        comment_list.append(comment)
-    return comment_list
-
-
-@pytest.fixture
 def comment(news, author):
     return Comment.objects.create(
         news=news, author=author, text='комментарий'
