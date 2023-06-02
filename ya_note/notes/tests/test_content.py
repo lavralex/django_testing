@@ -26,12 +26,12 @@ class TestContent(TestCase):
             (self.author, self.assertIn),
             (self.user, self.assertNotIn),
         )
-        for user, n in users:
+        for user, check in users:
             with self.subTest(user=user.username):
                 self.client.force_login(user)
                 response = self.client.get(reverse('notes:list'))
                 notes = response.context['object_list']
-                n(self.note, notes)
+                check(self.note, notes)
 
     def test_authorized_client_has_form(self):
         urls = (
