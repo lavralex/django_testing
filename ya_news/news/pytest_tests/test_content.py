@@ -35,7 +35,7 @@ def test_comments_order(client, news, comment_list):
 
 
 @pytest.mark.django_db
-def test_authorized_client_has_form1(authorized_client, news):
+def test_form(authorized_client, news):
     response = authorized_client.get(reverse('news:detail', args=(news.id,)))
     assert isinstance(response.context['form'], CommentForm)
     authorized_client.logout()
