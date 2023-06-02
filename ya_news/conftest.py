@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils import timezone
+
 from news.models import Comment, News
 
 User = get_user_model()
@@ -56,15 +57,16 @@ def comment(news, author):
 
 
 @pytest.fixture
-def news_with_comments(news, author):
-    now = timezone.now()
-    for index in range(2):
+def comment_list(author, news):
+    comment_list = []
+    for index in range(5):
         comment = Comment.objects.create(
-            news=news, author=author, text=f'Текст {index}',
+            news=news, author=author, text='комментарий',
+            created=timezone.now() + timezone.timedelta(days=index)
         )
-        comment.created = now + timezone.timedelta(days=index)
         comment.save()
-    return news
+        comment_list.append(comment)
+    return comment_list
 
 
 @pytest.fixture

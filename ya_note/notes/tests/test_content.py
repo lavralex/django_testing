@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+
 from notes.forms import NoteForm
 from notes.models import Note
 
@@ -11,7 +12,6 @@ class TestContent(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.list_url = reverse('notes:list')
         cls.author = User.objects.create(username='автор')
         cls.user = User.objects.create(username='другой пользователь')
         cls.note = Note.objects.create(
@@ -23,23 +23,22 @@ class TestContent(TestCase):
 
     def test_note_in_list(self):
         users = (
-            (self.author, True),
-            (self.user, False),
+            (self.author, self.assertIn),
+            (self.user, self.assertNotIn),
         )
-        for user, expected_notes in users:
+        for user, n in users:
             with self.subTest(user=user.username):
                 self.client.force_login(user)
-                response = self.client.get(self.list_url)
+                response = self.client.get(reverse('notes:list'))
                 notes = response.context['object_list']
-                self.assertEqual((self.note in notes), expected_notes)
+                n(self.note, notes)
 
     def test_authorized_client_has_form(self):
         urls = (
             ('notes:add', None),
-            ('notes:edit', ('note-slug',)),
+            ('notes:edit', (self.note.slug,)),
         )
         for name, args in urls:
             self.client.force_login(self.author)
             response = self.client.get(reverse(name, args=args))
-            form_class = NoteForm
-            self.assertIsInstance(response.context['form'], form_class)
+            self.assertIsInstance(response.context['form'], NoteForm)
